@@ -1,0 +1,68 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is Android?",
+      "options": [
+        "Operating System",
+        "Programming Language",
+        "Web Browser",
+        "Database"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "id": 2,
+      "question": "Which language is mainly used for Android?",
+      "options": [
+        "Java",
+        "Kotlin",
+        "Swift",
+        "Python"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "id": 3,
+      "question": "Who owns Android?",
+      "options": [
+        "Apple",
+        "Microsoft",
+        "Google",
+        "Amazon"
+      ],
+      "correctAnswerIndex": 2
+    } ,
+    {
+      "id": 4,
+      "question": "What is Jetpack Compose?",
+      "options": [
+        "Database",
+        "UI Toolkit",
+        "API",
+        "Build Tool"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "id": 5,
+      "question": "Which architecture are we using?",
+      "options": ["MVC", "MVP", "MVVM", "None"],
+      "correctAnswerIndex": 2
+    },
+    {
+      "id": 6,
+      "question": "SharedPreferences is used for?",
+      "options": [
+        "Large data storage",
+        "Temporary cache",
+        "Key-value storage",
+        "Network calls"
+      ],
+      "correctAnswerIndex": 2
+    }
+
+  ]
+}
+
+
