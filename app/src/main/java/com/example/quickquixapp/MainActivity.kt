@@ -3,6 +3,7 @@ package com.example.quickquixapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.quickquixapp.di.ViewModelFactory
@@ -19,28 +20,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-
             val navController = rememberNavController()
 
-            val appContainer =
-                (applicationContext as QuickQuixApplication).appContainer
-
-            val factory = ViewModelFactory(appContainer)
-
-            val homeViewModel: HomeViewModel = viewModel(factory = factory)
-            val quizViewModel: QuizViewModel = viewModel(factory = factory)
-            val highScoreViewModel: HighScoreViewModel = viewModel(factory = factory)
-            val enterNameViewModel: EnterNameViewModel = viewModel(factory = factory)
-
-            QuickQuixAppTheme(darkTheme = homeViewModel.isDarkMode) {
-
-                QuickQuixNavGraph(
-                    navController = navController,
-                    homeViewModel = homeViewModel,
-                    quizViewModel = quizViewModel,
-                    highScoreViewModel = highScoreViewModel,
-                    enterNameViewModel = enterNameViewModel
-                )
+            QuickQuixAppTheme {
+                QuickQuixNavGraph(navController = navController)
             }
         }
     }

@@ -1,8 +1,7 @@
 package com.example.quickquixapp.ui.navigation
 
-
-
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,11 +17,7 @@ import com.example.quickquixapp.ui.result.ResultScreen
 
 @Composable
 fun QuickQuixNavGraph(
-    navController: NavHostController,
-    homeViewModel: HomeViewModel,
-    quizViewModel: QuizViewModel,
-    highScoreViewModel: HighScoreViewModel,
-    enterNameViewModel: EnterNameViewModel
+    navController: NavHostController
 ) {
 
     NavHost(
@@ -31,6 +26,8 @@ fun QuickQuixNavGraph(
     ) {
 
         composable(NavRoute.Home.route) {
+            val homeViewModel: HomeViewModel = viewModel()
+
             HomeScreen(
                 viewModel = homeViewModel,
                 onStartClick = {
@@ -40,23 +37,29 @@ fun QuickQuixNavGraph(
         }
 
         composable(NavRoute.EnterName.route) {
+            val enterNameViewModel: EnterNameViewModel = viewModel()
+            val homeViewModel: HomeViewModel =
+                viewModel(navController.getBackStackEntry(NavRoute.Home.route))
+
             EnterNameScreen(
                 viewModel = enterNameViewModel,
-                onContinue = { name ->
-                    quizViewModel.startQuiz(
-                        userName = name,
-                        difficulty = homeViewModel.selectedDifficulty
-                    )
+                onContinue = {
                     navController.navigate(NavRoute.Quiz.route)
                 }
             )
         }
 
         composable(NavRoute.Quiz.route) {
+            val quizViewModel: QuizViewModel = viewModel()
+
             QuizScreen(viewModel = quizViewModel)
         }
 
         composable(NavRoute.Result.route) {
+            val quizViewModel: QuizViewModel =
+                viewModel(navController.getBackStackEntry(NavRoute.Quiz.route))
+            val highScoreViewModel: HighScoreViewModel = viewModel()
+
             ResultScreen(
                 score = quizViewModel.score,
                 totalQuestions = quizViewModel.totalQuestions(),
@@ -75,6 +78,7 @@ fun QuickQuixNavGraph(
         }
 
         composable(NavRoute.HighScore.route) {
+            val highScoreViewModel: HighScoreViewModel = viewModel()
             HighScoreScreen(viewModel = highScoreViewModel)
         }
     }
