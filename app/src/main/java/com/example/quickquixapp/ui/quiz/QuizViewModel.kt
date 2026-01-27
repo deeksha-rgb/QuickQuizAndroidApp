@@ -16,7 +16,7 @@ class QuizViewModel(
     private val scoreRepository: ScoreRepository
 ) : ViewModel() {
 
-    // ---------- UI STATE ----------
+    // ---------- STATE ----------
     sealed class QuizUiState {
         object Idle : QuizUiState()
         object Playing : QuizUiState()
@@ -46,7 +46,7 @@ class QuizViewModel(
 
     fun totalQuestions(): Int = questions.size
 
-    // ---------- ANSWER STATE ----------
+    // ---------- ANSWER ----------
     sealed class AnswerState {
         object NotAnswered : AnswerState()
         data class Answered(val index: Int) : AnswerState()
@@ -59,16 +59,16 @@ class QuizViewModel(
     var score by mutableIntStateOf(0)
         private set
 
-    // =========================================================
-    // ACTIONS
-    // =========================================================
-
+    // ---------- QUIZ START (ONLY ONCE) ----------
     fun startQuiz(userName: String, difficulty: Difficulty) {
+        if (quizState == QuizUiState.Playing) return
+
         this.userName = userName
         questions = quizRepository.getQuestions(difficulty)
 
         currentQuestionIndex = 0
         score = 0
+        timeLeft = 10
         answerState = AnswerState.NotAnswered
         quizState = QuizUiState.Playing
 
@@ -81,14 +81,13 @@ class QuizViewModel(
         answerState = AnswerState.Answered(index)
         stopTimer()
 
-
         viewModelScope.launch {
             delay(400)
             nextQuestion()
         }
     }
 
-    fun nextQuestion() {
+    private fun nextQuestion() {
         val question = currentQuestion ?: return
 
         if (
@@ -113,14 +112,11 @@ class QuizViewModel(
         quizState = QuizUiState.Idle
         currentQuestionIndex = 0
         score = 0
-        answerState = AnswerState.NotAnswered
         timeLeft = 10
+        answerState = AnswerState.NotAnswered
     }
 
-    // =========================================================
-    // TIMER
-    // =========================================================
-
+    // ---------- TIMER ----------
     private fun startTimer() {
         timerJob?.cancel()
         timeLeft = 10
@@ -130,7 +126,6 @@ class QuizViewModel(
                 delay(1000)
                 timeLeft--
             }
-
             if (answerState is AnswerState.NotAnswered) {
                 nextQuestion()
             }
@@ -142,24 +137,17 @@ class QuizViewModel(
         timerJob = null
     }
 
-    // =========================================================
-    // FINISH + SAVE
-    // =========================================================
-
+    // ---------- FINISH ----------
     private fun finishQuiz() {
         stopTimer()
         quizState = QuizUiState.Finished
-        saveScoreToRoom()
+        saveScore()
     }
 
-    private fun saveScoreToRoom() {
+    private fun saveScore() {
         if (userName.isBlank()) return
-
         viewModelScope.launch {
-            scoreRepository.saveScore(
-                userName = userName,
-                score = score
-            )
+            scoreRepository.saveScore(userName, score)
         }
     }
 }

@@ -1,10 +1,15 @@
 package com.example.quickquixapp.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.quickquixapp.domain.model.Difficulty
 import com.example.quickquixapp.ui.highscore.HighScoreScreen
 import com.example.quickquixapp.ui.highscore.HighScoreViewModel
 import com.example.quickquixapp.ui.home.HomeScreen
@@ -17,7 +22,8 @@ import com.example.quickquixapp.ui.result.ResultScreen
 
 @Composable
 fun QuickQuixNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModelFactory: ViewModelProvider.Factory
 ) {
 
     NavHost(
@@ -25,47 +31,106 @@ fun QuickQuixNavGraph(
         startDestination = NavRoute.Home.route
     ) {
 
+        // ---------------- HOME ----------------
         composable(NavRoute.Home.route) {
-            val homeViewModel: HomeViewModel = viewModel()
+            val homeVM: HomeViewModel =
+                viewModel(factory = viewModelFactory)
 
             HomeScreen(
-                viewModel = homeViewModel,
+                viewModel = homeVM,
                 onStartClick = {
                     navController.navigate(NavRoute.EnterName.route)
                 }
             )
         }
 
+        // ---------------- ENTER NAME ----------------
         composable(NavRoute.EnterName.route) {
-            val enterNameViewModel: EnterNameViewModel = viewModel()
-            val homeViewModel: HomeViewModel =
-                viewModel(navController.getBackStackEntry(NavRoute.Home.route))
+            val enterVM: EnterNameViewModel =
+                viewModel(factory = viewModelFactory)
+
+            val homeVM: HomeViewModel =
+                viewModel(
+                    navController.getBackStackEntry(NavRoute.Home.route),
+                    factory = viewModelFactory
+                )
 
             EnterNameScreen(
-                viewModel = enterNameViewModel,
-                onContinue = {
-                    navController.navigate(NavRoute.Quiz.route)
+                viewModel = enterVM,
+                onContinue = { name ->
+                    navController.navigate(
+                        NavRoute.Quiz.createRoute(
+                            userName = name,
+                            difficulty = homeVM.selectedDifficulty.name
+                        )
+                    )
                 }
             )
         }
 
-        composable(NavRoute.Quiz.route) {
-            val quizViewModel: QuizViewModel = viewModel()
+        // ---------------- QUIZ ----------------
+        composable(
+            route = NavRoute.Quiz.route,
+            arguments = listOf(
+                navArgument("userName") { type = NavType.StringType },
+                navArgument("difficulty") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
 
-            QuizScreen(viewModel = quizViewModel)
+            val quizVM: QuizViewModel =
+                viewModel(factory = viewModelFactory)
+
+            val userName =
+                backStackEntry.arguments?.getString("userName") ?: ""
+
+            val difficulty =
+                Difficulty.valueOf(
+                    backStackEntry.arguments?.getString("difficulty") ?: "EASY"
+                )
+
+            // ✅ Start quiz only once
+            LaunchedEffect(Unit) {
+                quizVM.startQuiz(userName, difficulty)
+            }
+
+            QuizScreen(
+                viewModel = quizVM,
+                onQuizFinished = {
+                    navController.navigate(
+                        NavRoute.Result.createRoute(
+                            score = quizVM.score,
+                            total = quizVM.totalQuestions()
+                        )
+                    ) {
+                        popUpTo(NavRoute.Quiz.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
-        composable(NavRoute.Result.route) {
-            val quizViewModel: QuizViewModel =
-                viewModel(navController.getBackStackEntry(NavRoute.Quiz.route))
-            val highScoreViewModel: HighScoreViewModel = viewModel()
+        // ---------------- RESULT ----------------
+        composable(
+            route = NavRoute.Result.route,
+            arguments = listOf(
+                navArgument("score") { type = NavType.IntType },
+                navArgument("total") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+
+            val score =
+                backStackEntry.arguments?.getInt("score") ?: 0
+
+            val total =
+                backStackEntry.arguments?.getInt("total") ?: 0
+
+            val highScoreVM: HighScoreViewModel =
+                viewModel(factory = viewModelFactory)
 
             ResultScreen(
-                score = quizViewModel.score,
-                totalQuestions = quizViewModel.totalQuestions(),
-                highScore = highScoreViewModel.highScore,
+                score = score,
+                totalQuestions = total,
+                highScore = highScoreVM.highScore,
                 onRestart = {
-                    quizViewModel.restartQuiz()
                     navController.popBackStack(
                         NavRoute.Home.route,
                         inclusive = false
@@ -77,9 +142,12 @@ fun QuickQuixNavGraph(
             )
         }
 
+        // ---------------- HIGH SCORE ----------------
         composable(NavRoute.HighScore.route) {
-            val highScoreViewModel: HighScoreViewModel = viewModel()
-            HighScoreScreen(viewModel = highScoreViewModel)
+            val vm: HighScoreViewModel =
+                viewModel(factory = viewModelFactory)
+
+            HighScoreScreen(viewModel = vm)
         }
     }
 }

@@ -35,7 +35,7 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun QuickQuixAppTheme(
-    darkTheme: Boolean ,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

@@ -22,8 +22,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
 
+            val appContainer =
+                (applicationContext as QuickQuixApplication).appContainer
+
+            val factory = ViewModelFactory(appContainer)
+
             QuickQuixAppTheme {
-                QuickQuixNavGraph(navController = navController)
+                QuickQuixNavGraph(
+                    navController = navController,
+                    viewModelFactory = factory
+                )
             }
         }
     }
