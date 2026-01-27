@@ -1,6 +1,5 @@
 package com.example.quickquixapp.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,9 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.quickquixapp.R
 
 @Composable
 fun GlowLogo() {
@@ -34,10 +31,8 @@ fun GlowLogo() {
                 spotColor = glowColor
             )
     ) {
-        Image(
-            painter = painterResource(R.drawable.quickquix_logo),
-            contentDescription = "QuickQuix Logo",
-            modifier = Modifier.padding(24.dp)
+        AppLogo(
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
