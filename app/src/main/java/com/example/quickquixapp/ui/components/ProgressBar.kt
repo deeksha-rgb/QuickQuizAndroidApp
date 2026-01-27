@@ -12,9 +12,9 @@ fun QuizProgressBar(
     total: Int
 ) {
     LinearProgressIndicator(
-        progress = current / total.toFloat(),
+        progress = { current / total.toFloat() },
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.primary,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant
+        color = MaterialTheme.colorScheme.primary,              // ✅ brand color
+        trackColor = MaterialTheme.colorScheme.surfaceVariant   // ✅ subtle track
     )
 }

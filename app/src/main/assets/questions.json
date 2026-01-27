@@ -3,66 +3,356 @@
     {
       "id": 1,
       "question": "What is Android?",
-      "options": [
-        "Operating System",
-        "Programming Language",
-        "Web Browser",
-        "Database"
-      ],
-      "correctAnswerIndex": 0
+      "options": ["Operating System", "Programming Language", "Web Browser", "Database"],
+      "correctAnswerIndex": 0,
+      "difficulty": "EASY"
     },
     {
       "id": 2,
-      "question": "Which language is mainly used for Android?",
-      "options": [
-        "Java",
-        "Kotlin",
-        "Swift",
-        "Python"
-      ],
-      "correctAnswerIndex": 1
+      "question": "Which language is mainly used for Android development today?",
+      "options": ["Java", "Kotlin", "Swift", "Python"],
+      "correctAnswerIndex": 1,
+      "difficulty": "EASY"
     },
     {
       "id": 3,
       "question": "Who owns Android?",
-      "options": [
-        "Apple",
-        "Microsoft",
-        "Google",
-        "Amazon"
-      ],
-      "correctAnswerIndex": 2
-    } ,
+      "options": ["Apple", "Microsoft", "Google", "Amazon"],
+      "correctAnswerIndex": 2,
+      "difficulty": "EASY"
+    },
     {
       "id": 4,
       "question": "What is Jetpack Compose?",
-      "options": [
-        "Database",
-        "UI Toolkit",
-        "API",
-        "Build Tool"
-      ],
-      "correctAnswerIndex": 1
+      "options": ["Database", "UI Toolkit", "API", "Build Tool"],
+      "correctAnswerIndex": 1,
+      "difficulty": "EASY"
     },
     {
       "id": 5,
-      "question": "Which architecture are we using?",
+      "question": "Which architecture are we using in this app?",
       "options": ["MVC", "MVP", "MVVM", "None"],
-      "correctAnswerIndex": 2
+      "correctAnswerIndex": 2,
+      "difficulty": "EASY"
     },
     {
       "id": 6,
       "question": "SharedPreferences is used for?",
-      "options": [
-        "Large data storage",
-        "Temporary cache",
-        "Key-value storage",
-        "Network calls"
-      ],
-      "correctAnswerIndex": 2
-    }
+      "options": ["Large data storage", "Temporary cache", "Key-value storage", "Network calls"],
+      "correctAnswerIndex": 2,
+      "difficulty": "EASY"
+    },
+    {
+      "id": 7,
+      "question": "Which file defines app theme colors?",
+      "options": ["MainActivity", "Theme.kt", "AndroidManifest.xml", "build.gradle"],
+      "correctAnswerIndex": 1,
+      "difficulty": "EASY"
+    },
+    {
+      "id": 8,
+      "question": "Which layout is replaced by Jetpack Compose?",
+      "options": ["XML Layouts", "JSON Layouts", "HTML", "CSS"],
+      "correctAnswerIndex": 0,
+      "difficulty": "EASY"
+    },
+    {
+      "id": 9,
+      "question": "What does ViewModel handle?",
+      "options": ["UI only", "Business logic & state", "Database", "Navigation"],
+      "correctAnswerIndex": 1,
+      "difficulty": "EASY"
+    },
+    {
+      "id": 10,
+      "question": "Which function launches a coroutine in Compose?",
+      "options": ["remember", "LaunchedEffect", "setContent", "mutableStateOf"],
+      "correctAnswerIndex": 1,
+      "difficulty": "EASY"
+    },
 
+    {
+      "id": 11,
+      "question": "What does mutableStateOf do?",
+      "options": ["Stores immutable data", "Triggers UI recomposition", "Saves data permanently", "Runs background task"],
+      "correctAnswerIndex": 1,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 12,
+      "question": "Which component is used to show scrollable lists?",
+      "options": ["Column", "Row", "LazyColumn", "Box"],
+      "correctAnswerIndex": 2,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 13,
+      "question": "Which scope survives configuration changes?",
+      "options": ["Activity", "Fragment", "ViewModel", "Composable"],
+      "correctAnswerIndex": 2,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 14,
+      "question": "What does remember do?",
+      "options": ["Stores value permanently", "Caches value across recompositions", "Runs coroutine", "Stores in DB"],
+      "correctAnswerIndex": 1,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 15,
+      "question": "Which file contains app permissions?",
+      "options": ["Theme.kt", "MainActivity", "AndroidManifest.xml", "settings.gradle"],
+      "correctAnswerIndex": 2,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 16,
+      "question": "What is Room?",
+      "options": ["UI Toolkit", "Database Library", "Network Library", "Testing Tool"],
+      "correctAnswerIndex": 1,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 17,
+      "question": "What is a Composable?",
+      "options": ["Function that describes UI", "Database table", "Service", "Broadcast Receiver"],
+      "correctAnswerIndex": 0,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 18,
+      "question": "Which keyword makes a function composable?",
+      "options": ["fun", "@UI", "@Composable", "suspend"],
+      "correctAnswerIndex": 2,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 19,
+      "question": "Which tool is used to design UI in Compose?",
+      "options": ["XML Editor", "Layout Inspector", "Composable functions", "Figma"],
+      "correctAnswerIndex": 2,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 20,
+      "question": "Which layout arranges items vertically?",
+      "options": ["Row", "Column", "Box", "Grid"],
+      "correctAnswerIndex": 1,
+      "difficulty": "MEDIUM"
+    },
+
+    {
+      "id": 21,
+      "question": "Which layout arranges items horizontally?",
+      "options": ["Column", "Box", "Row", "LazyColumn"],
+      "correctAnswerIndex": 2,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 22,
+      "question": "What does fillMaxSize do?",
+      "options": ["Wraps content", "Fills available space", "Adds padding", "Centers content"],
+      "correctAnswerIndex": 1,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 23,
+      "question": "What does MaterialTheme provide?",
+      "options": ["Database", "Colors, typography, shapes", "Navigation", "Permissions"],
+      "correctAnswerIndex": 1,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 24,
+      "question": "Which is used for navigation?",
+      "options": ["Room", "NavController", "ViewModel", "SharedPreferences"],
+      "correctAnswerIndex": 1,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 25,
+      "question": "What does LazyVerticalGrid provide?",
+      "options": ["Horizontal list", "Vertical list", "Grid layout", "Single item"],
+      "correctAnswerIndex": 2,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 26,
+      "question": "Which function updates UI automatically?",
+      "options": ["println", "setText", "State change", "Intent"],
+      "correctAnswerIndex": 2,
+      "difficulty": "MEDIUM"
+    },
+    {
+      "id": 27,
+      "question": "What is State Hoisting?",
+      "options": ["Moving state up", "Deleting state", "Saving state", "Ignoring state"],
+      "correctAnswerIndex": 0,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 28,
+      "question": "Which library is used for analytics?",
+      "options": ["Retrofit", "Room", "CleverTap", "Glide"],
+      "correctAnswerIndex": 2,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 29,
+      "question": "Which data format is used for questions?",
+      "options": ["XML", "CSV", "JSON", "TXT"],
+      "correctAnswerIndex": 2,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 30,
+      "question": "What does shuffle() do?",
+      "options": ["Sorts list", "Reverses list", "Randomizes list", "Deletes list"],
+      "correctAnswerIndex": 2,
+      "difficulty": "HARD"
+    },
+
+    {
+      "id": 31,
+      "question": "Which function delays execution?",
+      "options": ["sleep()", "delay()", "wait()", "pause()"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 32,
+      "question": "Which scope launches coroutines in ViewModel?",
+      "options": ["GlobalScope", "lifecycleScope", "viewModelScope", "rememberScope"],
+      "correctAnswerIndex": 2,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 33,
+      "question": "What is recomposition?",
+      "options": ["App restart", "UI redraw on state change", "Navigation", "DB update"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 34,
+      "question": "Which is immutable?",
+      "options": ["var", "mutableStateOf", "val", "lateinit"],
+      "correctAnswerIndex": 2,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 35,
+      "question": "Which component holds single child?",
+      "options": ["Column", "Row", "Box", "LazyColumn"],
+      "correctAnswerIndex": 2,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 36,
+      "question": "What is rememberSaveable used for?",
+      "options": ["Save DB", "Survive config changes", "Network call", "Navigation"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 37,
+      "question": "Which modifier adds space?",
+      "options": ["fillMaxSize", "padding", "weight", "align"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 38,
+      "question": "Which file handles dependencies?",
+      "options": ["settings.gradle", "build.gradle", "Theme.kt", "AndroidManifest"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 39,
+      "question": "What does weight(1f) do?",
+      "options": ["Fixes size", "Takes remaining space", "Centers UI", "Adds margin"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 40,
+      "question": "Which is lifecycle-aware?",
+      "options": ["Coroutine", "Thread", "ViewModel", "Handler"],
+      "correctAnswerIndex": 2,
+      "difficulty": "HARD"
+    },
+
+    {
+      "id": 41,
+      "question": "Which UI element is clickable?",
+      "options": ["Text", "Button", "Spacer", "Divider"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 42,
+      "question": "Which function sets UI content?",
+      "options": ["onCreate", "setContent", "compose()", "drawUI"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 43,
+      "question": "Which file defines app entry point?",
+      "options": ["Theme.kt", "MainActivity", "ViewModel", "NavGraph"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 44,
+      "question": "What is Material Design?",
+      "options": ["Programming language", "Design system", "Database", "Compiler"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 45,
+      "question": "Which composable shows text?",
+      "options": ["Label", "Text", "Paragraph", "Title"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 46,
+      "question": "Which is used for spacing?",
+      "options": ["Spacer", "Divider", "Box", "Row"],
+      "correctAnswerIndex": 0,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 47,
+      "question": "Which is NOT a state holder?",
+      "options": ["ViewModel", "mutableStateOf", "Intent", "remember"],
+      "correctAnswerIndex": 2,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 48,
+      "question": "Which is asynchronous?",
+      "options": ["delay()", "println()", "setText()", "return"],
+      "correctAnswerIndex": 0,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 49,
+      "question": "Which library helps UI animation?",
+      "options": ["Room", "Compose Animation", "Retrofit", "Gson"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    },
+    {
+      "id": 50,
+      "question": "Which approach improves scalability?",
+      "options": ["Hardcoding", "Clean architecture", "Global variables", "Single Activity only"],
+      "correctAnswerIndex": 1,
+      "difficulty": "HARD"
+    }
   ]
 }
-
-

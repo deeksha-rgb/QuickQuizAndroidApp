@@ -11,13 +11,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quickquixapp.ui.components.AnimatedPrimaryButton
+import com.example.quickquixapp.ui.components.ScreenContainer
 
 /**
  * ResultScreen
  *
  * Pure UI screen.
- * Shows final quiz result.
- * No ViewModel required.
+ * Uses app theme colors (Light + Dark).
  */
 @Composable
 fun ResultScreen(
@@ -27,69 +27,77 @@ fun ResultScreen(
     onRestart: () -> Unit,
     onViewHighScores: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    ScreenContainer {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-        // ---------- TITLE ----------
-        Text(
-            text = "Your Score",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+            //  TITLE
+            Text(
+                text = "Your Score",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-        // ---------- SCORE ----------
-        Text(
-            text = "$score / $totalQuestions",
-            fontSize = 36.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
+            //  SCORE
+            Text(
+                text = "$score / $totalQuestions",
+                fontSize = 38.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-        // ---------- MESSAGE ----------
-        Text(
-            text = if (score >= totalQuestions / 2)
-                "Great job!"
-            else
-                "Try again!",
-            fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+            //  FEEDBACK MESSAGE
+            Text(
+                text = if (score >= totalQuestions / 2)
+                    "Great job! 🎉"
+                else
+                    "Try again 💪",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-        // ---------- ACTIONS ----------
-        AnimatedPrimaryButton(
-            text = "Restart Quiz",
-            onClick = onRestart,
-            modifier = Modifier.width(180.dp)
-        )
+            //  RESTART
+            AnimatedPrimaryButton(
+                text = "Restart Quiz",
+                onClick = onRestart,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-        AnimatedPrimaryButton(
-            text = "View High Scores",
-            onClick = onViewHighScores,
-            modifier = Modifier.width(200.dp)
-        )
+            //  HIGH SCORES
+            AnimatedPrimaryButton(
+                text = "View High Scores",
+                onClick = onViewHighScores,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-        // ---------- HIGH SCORE ----------
-        Text(
-            text = "High Score: $highScore",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+            // HIGH SCORE DISPLAY
+            Text(
+                text = "High Score: $highScore",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+            )
+        }
     }
 }

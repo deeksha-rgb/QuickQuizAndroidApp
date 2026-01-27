@@ -13,6 +13,8 @@ import com.example.quickquixapp.ui.highscore.HighScoreScreen
 import com.example.quickquixapp.ui.highscore.HighScoreViewModel
 import com.example.quickquixapp.ui.home.HomeScreen
 import com.example.quickquixapp.ui.home.HomeViewModel
+import com.example.quickquixapp.ui.name.EnterNameScreen
+import com.example.quickquixapp.ui.name.EnterNameViewModel
 import com.example.quickquixapp.ui.navigation.NavRoute
 import com.example.quickquixapp.ui.quiz.QuizScreen
 import com.example.quickquixapp.ui.quiz.QuizViewModel
@@ -31,16 +33,15 @@ class MainActivity : ComponentActivity() {
 
             val appContainer =
                 (applicationContext as QuickQuixApplication).appContainer
-            //this provides the resources to all the files
 
             val factory = ViewModelFactory(appContainer)
-            //this provies respository to the viewmodels
 
             val homeViewModel: HomeViewModel = viewModel(factory = factory)
             val quizViewModel: QuizViewModel = viewModel(factory = factory)
             val highScoreViewModel: HighScoreViewModel = viewModel(factory = factory)
+            val enterNameViewModel: EnterNameViewModel = viewModel(factory = factory)
 
-            //  SEALED STATE BASED NAVIGATION
+            // 🔹 Auto navigate to Result when quiz finishes
             LaunchedEffect(quizViewModel.quizState) {
                 if (quizViewModel.quizState is QuizUiState.Finished) {
                     navController.navigate(NavRoute.Result.route) {
@@ -53,24 +54,39 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = NavRoute.Home.route
+                    startDestination = NavRoute.Home.route   //  FIXED
                 ) {
 
+                    //  HOME
                     composable(NavRoute.Home.route) {
                         HomeScreen(
                             viewModel = homeViewModel,
                             onStartClick = {
-                                quizViewModel.userName = homeViewModel.userName
-                                quizViewModel.startQuiz()
+                                navController.navigate(NavRoute.EnterName.route)
+                            }
+                        )
+                    }
+
+                    //  ENTER NAME
+                    composable(NavRoute.EnterName.route) {
+                        EnterNameScreen(
+                            viewModel = enterNameViewModel,
+                            onContinue = { name ->
+                                quizViewModel.startQuiz(
+                                    userName = name,
+                                    difficulty = homeViewModel.selectedDifficulty
+                                )
                                 navController.navigate(NavRoute.Quiz.route)
                             }
                         )
                     }
 
+                    //  QUIZ
                     composable(NavRoute.Quiz.route) {
                         QuizScreen(viewModel = quizViewModel)
                     }
 
+                    //  RESULT
                     composable(NavRoute.Result.route) {
                         ResultScreen(
                             score = quizViewModel.score,
@@ -89,12 +105,9 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-
+                    // HIGH SCORE
                     composable(NavRoute.HighScore.route) {
-                        HighScoreScreen(
-                            viewModel = highScoreViewModel,
-                            onBack = { navController.popBackStack() }
-                        )
+                        HighScoreScreen(viewModel = highScoreViewModel)
                     }
                 }
             }

@@ -5,12 +5,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.quickquixapp.ui.highscore.HighScoreViewModel
 import com.example.quickquixapp.ui.quiz.QuizViewModel
 import com.example.quickquixapp.ui.home.HomeViewModel
+import com.example.quickquixapp.ui.name.EnterNameViewModel
 
 class ViewModelFactory(
     private val appContainer: AppContainer
 ) : ViewModelProvider.Factory {
 
-    @Suppress("UNCHECKED_CAST")
+//    @Suppress("UNCHECKED_CAST")t 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
 
@@ -35,6 +36,11 @@ class ViewModelFactory(
                     scoreRepository = appContainer.scoreRepository
                 ) as T
             }
+
+            modelClass.isAssignableFrom(EnterNameViewModel::class.java) ->{
+                EnterNameViewModel() as T
+            }
+
 
             else -> throw IllegalArgumentException(
                 "Unknown ViewModel class: ${modelClass.name}"

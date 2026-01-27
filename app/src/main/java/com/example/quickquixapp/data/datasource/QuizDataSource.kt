@@ -12,3 +12,15 @@ interface QuizDataSource {
      */
     fun loadQuestions(): List<Question>
 }
+
+//UI
+//↓
+//ViewModel
+//↓
+//QuizRepository
+//↓
+//QuizDataSource (interface)
+//↓
+//AndroidQuizDataSource (JSON)
+
+// this is abstraction doesnt matters from where data is coming we just need a list of questions

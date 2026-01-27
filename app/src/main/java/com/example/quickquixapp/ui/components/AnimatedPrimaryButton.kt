@@ -1,9 +1,9 @@
 package com.example.quickquixapp.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,36 +12,42 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 
 /**
- * AnimatedPrimaryButton: A custom button that shrinks slightly when clicked.
- * This makes the app feel more interactive and "bouncy".
+ * AnimatedPrimaryButton
+ *
+ * - Shrinks slightly when pressed
+ * - Smoothly returns to normal size when released
+ * - Reusable across the entire app
  */
 @Composable
 fun AnimatedPrimaryButton(
-    text: String, // The text to show inside the button
-    onClick: () -> Unit, // What happens when the button is clicked
+    text: String,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true // If false, the button cannot be clicked
+    enabled: Boolean = true
 ) {
-    // State to track if the button is currently being pressed (not used directly in logic here but scale depends on it)
-    // Actually, in this implementation, it's just a placeholder for future 'press' logic
-    // or we can use a basic scale effect.
+    // Detect press state
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
 
+    // Animate scale based on press state
     val scale by animateFloatAsState(
-        targetValue = 1f, // Default scale
-        label = "pressScale"
+        targetValue = if (isPressed) 0.96f else 1f,
+        label = "buttonPressScale"
     )
 
     Button(
         onClick = onClick,
         enabled = enabled,
+        interactionSource = interactionSource,
         modifier = modifier
-            .scale(scale), // Apply the scale animation
-        shape = RoundedCornerShape(16.dp), // Rounded corners
+            .scale(scale),
+        shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
         elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = 6.dp
+            defaultElevation = 6.dp,
+            pressedElevation = 2.dp
         )
     ) {
         Text(
@@ -51,6 +57,3 @@ fun AnimatedPrimaryButton(
         )
     }
 }
-
-
-

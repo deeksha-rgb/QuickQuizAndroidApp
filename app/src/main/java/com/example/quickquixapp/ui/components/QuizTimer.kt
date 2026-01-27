@@ -17,25 +17,27 @@ fun QuizTimer(
     timeLeft: Int,
     totalTime: Int = 10
 ) {
+    val isWarning = timeLeft <= 3
+
     Text(
         text = "Time left: $timeLeft s",
         fontSize = 14.sp,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
-        color = if (timeLeft <= 3)
-            MaterialTheme.colorScheme.error
+        color = if (isWarning)
+            MaterialTheme.colorScheme.error        // 🔴 danger
         else
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.primary      // 🟣 normal
     )
 
     Spacer(modifier = Modifier.height(6.dp))
 
     LinearProgressIndicator(
-        progress = timeLeft / totalTime.toFloat(),
+        progress = { timeLeft / totalTime.toFloat() },
         modifier = Modifier
             .fillMaxWidth()
             .height(6.dp),
-        color = if (timeLeft <= 3)
+        color = if (isWarning)
             MaterialTheme.colorScheme.error
         else
             MaterialTheme.colorScheme.primary,

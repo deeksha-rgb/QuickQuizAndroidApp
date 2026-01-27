@@ -12,16 +12,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quickquixapp.domain.model.Question
-import com.example.quickquixapp.ui.components.OptionCard
-import com.example.quickquixapp.ui.components.QuizProgressBar
-import com.example.quickquixapp.ui.components.QuizTimer
+import com.example.quickquixapp.ui.components.*
 import kotlinx.coroutines.delay
+
+
 
 @Composable
 fun QuizScreen(viewModel: QuizViewModel) {
@@ -38,7 +37,7 @@ fun QuizScreen(viewModel: QuizViewModel) {
         if (autoNext) {
             delay(400)
             viewModel.nextQuestion()
-            autoNext = false
+//            autoNext = false
         }
     }
 
@@ -49,21 +48,23 @@ fun QuizScreen(viewModel: QuizViewModel) {
             .padding(16.dp)
     ) {
 
-        // ---------- TIMER ----------
+        // ⏱ TIMER (NO extra params)
         QuizTimer(
             timeLeft = viewModel.timeLeft
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ---------- QUESTION PROGRESS ----------
+        // 📊 PROGRESS TEXT
         Text(
             text = "Question ${viewModel.currentQuestionIndex + 1} of ${viewModel.totalQuestions()}",
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
 
         Spacer(modifier = Modifier.height(6.dp))
 
+        // 📈 PROGRESS BAR (NO extra params)
         QuizProgressBar(
             current = viewModel.currentQuestionIndex + 1,
             total = viewModel.totalQuestions()
@@ -71,7 +72,7 @@ fun QuizScreen(viewModel: QuizViewModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // ---------- QUESTION ----------
+        // ❓ QUESTION
         Text(
             text = question.question,
             fontSize = 22.sp,
@@ -81,7 +82,7 @@ fun QuizScreen(viewModel: QuizViewModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ---------- OPTIONS ----------
+        // 🧩 OPTIONS
         if (isLandscape) {
             OptionsGrid(
                 question = question,
@@ -97,7 +98,6 @@ fun QuizScreen(viewModel: QuizViewModel) {
         }
     }
 }
-
 @Composable
 fun OptionsList(
     question: Question,
@@ -109,13 +109,7 @@ fun OptionsList(
         modifier = Modifier.fillMaxWidth()
     ) {
         itemsIndexed(question.options) { index, option ->
-            OptionItem(
-                option = option,
-                index = index,
-                question = question,
-                viewModel = viewModel,
-                onAnswered = onAnswered
-            )
+            OptionItem(option, index, question, viewModel, onAnswered)
         }
     }
 }
@@ -133,13 +127,7 @@ fun OptionsGrid(
         modifier = Modifier.fillMaxWidth()
     ) {
         itemsIndexed(question.options) { index, option ->
-            OptionItem(
-                option = option,
-                index = index,
-                question = question,
-                viewModel = viewModel,
-                onAnswered = onAnswered
-            )
+            OptionItem(option, index, question, viewModel, onAnswered)
         }
     }
 }
@@ -173,4 +161,3 @@ fun OptionItem(
         }
     )
 }
-
