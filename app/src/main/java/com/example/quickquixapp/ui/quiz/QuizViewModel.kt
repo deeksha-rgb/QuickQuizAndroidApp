@@ -81,7 +81,7 @@ class QuizViewModel(
         answerState = AnswerState.Answered(index)
         stopTimer()
 
-        // 🔥 IMPORTANT FIX: next question only once
+
         viewModelScope.launch {
             delay(400)
             nextQuestion()
@@ -131,7 +131,6 @@ class QuizViewModel(
                 timeLeft--
             }
 
-            // ⛔ FIX: timer should not double-trigger
             if (answerState is AnswerState.NotAnswered) {
                 nextQuestion()
             }
