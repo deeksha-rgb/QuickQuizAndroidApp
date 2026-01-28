@@ -9,3 +9,5 @@ import com.example.quickquixapp.domain.model.Question
 data class QuestionResponse(
     val questions: List<Question>
 )
+
+

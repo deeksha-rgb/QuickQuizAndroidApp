@@ -23,7 +23,8 @@ import com.example.quickquixapp.ui.result.ResultScreen
 @Composable
 fun QuickQuixNavGraph(
     navController: NavHostController,
-    viewModelFactory: ViewModelProvider.Factory
+    viewModelFactory: ViewModelProvider.Factory,
+    homeViewModel: HomeViewModel
 ) {
 
     NavHost(
@@ -33,11 +34,8 @@ fun QuickQuixNavGraph(
 
         // ---------------- HOME ----------------
         composable(NavRoute.Home.route) {
-            val homeVM: HomeViewModel =
-                viewModel(factory = viewModelFactory)
-
             HomeScreen(
-                viewModel = homeVM,
+                viewModel = homeViewModel, // 👈 SAME ViewModel from MainActivity
                 onStartClick = {
                     navController.navigate(NavRoute.EnterName.route)
                 }
@@ -61,7 +59,7 @@ fun QuickQuixNavGraph(
                     navController.navigate(
                         NavRoute.Quiz.createRoute(
                             userName = name,
-                            difficulty = homeVM.selectedDifficulty.name
+                            difficulty = homeViewModel.selectedDifficulty.name
                         )
                     )
                 }
@@ -88,7 +86,7 @@ fun QuickQuixNavGraph(
                     backStackEntry.arguments?.getString("difficulty") ?: "EASY"
                 )
 
-            // ✅ Start quiz only once
+            //  Start quiz only once
             LaunchedEffect(Unit) {
                 quizVM.startQuiz(userName, difficulty)
             }
