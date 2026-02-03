@@ -35,7 +35,7 @@ fun QuickQuixNavGraph(
         // ---------------- HOME ----------------
         composable(NavRoute.Home.route) {
             HomeScreen(
-                viewModel = homeViewModel, // 👈 SAME ViewModel from MainActivity
+                viewModel = homeViewModel, //  SAME ViewModel from MainActivity
                 onStartClick = {
                     navController.navigate(NavRoute.EnterName.route)
                 }

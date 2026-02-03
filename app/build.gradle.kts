@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
+
 }
 
 android {
@@ -41,10 +43,14 @@ android {
 }
 
 dependencies {
+
+    implementation("androidx.core:core:1.13.0")
+    implementation("com.clevertap.android:clevertap-android-sdk:7.8.0")
+    implementation("com.google.firebase:firebase-messaging:24.0.0")
     implementation(libs.navigation.compose)
     implementation(libs.gson)
     implementation(libs.lifecycle.vm.compose)
-    
+
     // Room Database
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

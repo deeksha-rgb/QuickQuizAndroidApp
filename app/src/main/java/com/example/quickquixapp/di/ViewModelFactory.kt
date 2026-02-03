@@ -2,6 +2,7 @@ package com.example.quickquixapp.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.quickquixapp.analytics.CleverTapAnalyticsTracker
 import com.example.quickquixapp.ui.highscore.HighScoreViewModel
 import com.example.quickquixapp.ui.quiz.QuizViewModel
 import com.example.quickquixapp.ui.home.HomeViewModel
@@ -26,7 +27,8 @@ class ViewModelFactory(
             modelClass.isAssignableFrom(QuizViewModel::class.java) -> {
                 QuizViewModel(
                     quizRepository = appContainer.quizRepository,
-                    scoreRepository = appContainer.scoreRepository
+                    scoreRepository = appContainer.scoreRepository,
+                    analytics = CleverTapAnalyticsTracker(appContainer.context)
                 ) as T
             }
 

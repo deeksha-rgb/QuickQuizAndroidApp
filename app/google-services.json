@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "151224251123",
+    "project_id": "quickquix-58f75",
+    "storage_bucket": "quickquix-58f75.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:151224251123:android:6e636cd3e78b0dc7fb7d86",
+        "android_client_info": {
+          "package_name": "com.example.quickquixapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFv2Dxkri-ASMU6NCT6mRhGB4VXQY0gqo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

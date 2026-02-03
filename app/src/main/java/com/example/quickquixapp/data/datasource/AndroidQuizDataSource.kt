@@ -4,10 +4,7 @@ import android.content.Context
 import com.example.quickquixapp.domain.model.Question
 import com.google.gson.Gson
 
-/**
- * AndroidQuizDataSource: This class is responsible for loading the quiz questions
- * from a JSON file stored in the app's 'assets' folder.
- */
+//this clas has only one work get the data from the json file
 class AndroidQuizDataSource(
     private val context: Context
 ) : QuizDataSource {

@@ -1,8 +1,10 @@
 package com.example.quickquixapp.ui.quiz
 
+import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.quickquixapp.analytics.AnalyticsTracker
 import com.example.quickquixapp.data.repository.QuizRepository
 import com.example.quickquixapp.data.repository.ScoreRepository
 import com.example.quickquixapp.domain.model.Difficulty
@@ -13,7 +15,8 @@ import kotlinx.coroutines.launch
 
 class QuizViewModel(
     private val quizRepository: QuizRepository,
-    private val scoreRepository: ScoreRepository
+    private val scoreRepository: ScoreRepository,
+    private val analytics: AnalyticsTracker
 ) : ViewModel() {
 
     // ---------- STATE ----------
@@ -25,6 +28,8 @@ class QuizViewModel(
 
     var quizState by mutableStateOf<QuizUiState>(QuizUiState.Idle)
         private set
+
+    private var quizDifficulty: Difficulty? = null
 
     // ---------- TIMER ----------
     private var timerJob: Job? = null
@@ -64,6 +69,7 @@ class QuizViewModel(
         if (quizState == QuizUiState.Playing) return
 
         this.userName = userName
+        this.quizDifficulty = difficulty
         questions = quizRepository.getQuestions(difficulty)
 
         currentQuestionIndex = 0
@@ -141,6 +147,20 @@ class QuizViewModel(
     private fun finishQuiz() {
         stopTimer()
         quizState = QuizUiState.Finished
+
+        Log.d("ANALYTICS", "Quiz_Completed fired")
+
+        analytics.trackEvent(
+
+            name = "Quiz_Completed",
+            properties = mapOf(
+                "score" to score,
+                "total" to totalQuestions(),
+                "difficulty" to quizDifficulty?.name.orEmpty()
+
+            )
+        )
+
         saveScore()
     }
 

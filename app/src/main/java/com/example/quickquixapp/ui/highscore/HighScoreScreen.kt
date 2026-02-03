@@ -81,7 +81,7 @@ fun HighScoreScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🧹 CLEAR ALL BUTTON
+            //  CLEAR ALL BUTTON
             Button(
                 onClick = { viewModel.clearAllScores() },
                 modifier = Modifier.align(Alignment.CenterHorizontally),
