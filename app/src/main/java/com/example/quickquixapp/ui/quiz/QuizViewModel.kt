@@ -1,10 +1,13 @@
 package com.example.quickquixapp.ui.quiz
 
+import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.quickquixapp.analytics.AnalyticsTracker
 import com.example.quickquixapp.data.repository.QuizRepository
 import com.example.quickquixapp.data.repository.ScoreRepository
+import com.example.quickquixapp.domain.model.Difficulty
 import com.example.quickquixapp.domain.model.Question
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -12,35 +15,35 @@ import kotlinx.coroutines.launch
 
 class QuizViewModel(
     private val quizRepository: QuizRepository,
-    private val scoreRepository: ScoreRepository
+    private val scoreRepository: ScoreRepository,
+    private val analytics: AnalyticsTracker
 ) : ViewModel() {
 
-    // ---------- QUIZ UI STATE ----------
+    // ---------- STATE ----------
     sealed class QuizUiState {
         object Idle : QuizUiState()
         object Playing : QuizUiState()
         object Finished : QuizUiState()
     }
-    private var timerJob: Job? = null
-
-    var timeLeft by mutableStateOf(10)
-        private set
 
     var quizState by mutableStateOf<QuizUiState>(QuizUiState.Idle)
         private set
-    private var isProcessingNext = false
 
+    private var quizDifficulty: Difficulty? = null
+
+    // ---------- TIMER ----------
+    private var timerJob: Job? = null
+
+    var timeLeft by mutableIntStateOf(10)
+        private set
 
     // ---------- USER ----------
-    var userName by mutableStateOf("")
-
-
-
+    private var userName: String = ""
 
     // ---------- QUESTIONS ----------
-    private val questions: List<Question> = quizRepository.getQuestions()
+    private var questions: List<Question> = emptyList()
 
-    var currentQuestionIndex by mutableStateOf(0)
+    var currentQuestionIndex by mutableIntStateOf(0)
         private set
 
     val currentQuestion: Question?
@@ -57,25 +60,40 @@ class QuizViewModel(
     var answerState by mutableStateOf<AnswerState>(AnswerState.NotAnswered)
         private set
 
-    var score by mutableStateOf(0)
+    // ---------- SCORE ----------
+    var score by mutableIntStateOf(0)
         private set
 
+    // ---------- QUIZ START (ONLY ONCE) ----------
+    fun startQuiz(userName: String, difficulty: Difficulty) {
+        if (quizState == QuizUiState.Playing) return
 
+        this.userName = userName
+        this.quizDifficulty = difficulty
+        questions = quizRepository.getQuestions(difficulty)
 
-    // ---------- ACTIONS ----------
-
-    fun startQuiz() {
+        currentQuestionIndex = 0
+        score = 0
+        timeLeft = 10
+        answerState = AnswerState.NotAnswered
         quizState = QuizUiState.Playing
+
         startTimer()
     }
 
     fun selectOption(index: Int) {
         if (answerState is AnswerState.Answered) return
+
         answerState = AnswerState.Answered(index)
         stopTimer()
+
+        viewModelScope.launch {
+            delay(400)
+            nextQuestion()
+        }
     }
 
-    fun nextQuestion() {
+    private fun nextQuestion() {
         val question = currentQuestion ?: return
 
         if (
@@ -91,22 +109,20 @@ class QuizViewModel(
             currentQuestionIndex++
             startTimer()
         } else {
-            quizState = QuizUiState.Finished
-            saveScoreToRoom()
-            stopTimer()
+            finishQuiz()
         }
     }
 
-
-
     fun restartQuiz() {
-       stopTimer()
+        stopTimer()
         quizState = QuizUiState.Idle
         currentQuestionIndex = 0
         score = 0
+        timeLeft = 10
         answerState = AnswerState.NotAnswered
     }
 
+    // ---------- TIMER ----------
     private fun startTimer() {
         timerJob?.cancel()
         timeLeft = 10
@@ -116,24 +132,42 @@ class QuizViewModel(
                 delay(1000)
                 timeLeft--
             }
-            nextQuestion()
+            if (answerState is AnswerState.NotAnswered) {
+                nextQuestion()
+            }
         }
     }
+
     private fun stopTimer() {
         timerJob?.cancel()
         timerJob = null
     }
 
+    // ---------- FINISH ----------
+    private fun finishQuiz() {
+        stopTimer()
+        quizState = QuizUiState.Finished
 
-    // ---------- ROOM DB SAVE ----------
-    private fun saveScoreToRoom() {
-        if (userName.isBlank()) return   // safety
+        Log.d("ANALYTICS", "Quiz_Completed fired")
 
-        viewModelScope.launch {
-            scoreRepository.saveScore(
-                userName = userName,
-                score = score
+        analytics.trackEvent(
+
+            name = "Quiz_Completed",
+            properties = mapOf(
+                "score" to score,
+                "total" to totalQuestions(),
+                "difficulty" to quizDifficulty?.name.orEmpty()
+
             )
+        )
+
+        saveScore()
+    }
+
+    private fun saveScore() {
+        if (userName.isBlank()) return
+        viewModelScope.launch {
+            scoreRepository.saveScore(userName, score)
         }
     }
 }

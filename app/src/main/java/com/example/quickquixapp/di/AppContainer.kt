@@ -12,8 +12,9 @@ import com.example.quickquixapp.data.repository.ScoreRepository
 // * It creates all the important parts (like Databases and Managers) in one place
 // * so they can be easily shared across the entire app.
 // */
-class
-AppContainer(context: Context) {
+class  AppContainer(
+    val context: Context
+) {
 
     // --- DATABASE SETUP ---
     //  Get or create the Room Database

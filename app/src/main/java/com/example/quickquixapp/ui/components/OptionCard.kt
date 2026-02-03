@@ -11,9 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.quickquixapp.ui.theme.ErrorRed
+import com.example.quickquixapp.ui.theme.SuccessGreen
 
 @Composable
 fun OptionCard(
@@ -24,29 +25,32 @@ fun OptionCard(
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isCorrect == true -> Color(0xFF4CAF50)   // Green
-            isCorrect == false && isSelected -> Color(0xFFF44336) // Red
-            isSelected -> MaterialTheme.colorScheme.primaryContainer
+            isCorrect == true -> SuccessGreen
+            isCorrect == false && isSelected -> ErrorRed
+            isSelected -> MaterialTheme.colorScheme.primary
             else -> MaterialTheme.colorScheme.surfaceVariant
         },
         label = "optionColor"
     )
+
+    val textColor =
+        if (isSelected || isCorrect != null)
+            MaterialTheme.colorScheme.onPrimary
+        else
+            MaterialTheme.colorScheme.onSurfaceVariant
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = isCorrect == null) { onClick() },
         color = backgroundColor,
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(14.dp)
     ) {
         Text(
             text = text,
             fontSize = 16.sp,
             modifier = Modifier.padding(16.dp),
-            color = if (isSelected || isCorrect != null)
-                Color.White
-            else
-                MaterialTheme.colorScheme.onSurfaceVariant
+            color = textColor
         )
     }
 }

@@ -10,9 +10,8 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,25 +20,27 @@ import com.example.quickquixapp.domain.model.Question
 import com.example.quickquixapp.ui.components.OptionCard
 import com.example.quickquixapp.ui.components.QuizProgressBar
 import com.example.quickquixapp.ui.components.QuizTimer
-import kotlinx.coroutines.delay
 
 @Composable
-fun QuizScreen(viewModel: QuizViewModel) {
+fun QuizScreen(
+    viewModel: QuizViewModel,
+    onQuizFinished: () -> Unit   // 👈 IMPORTANT
+) {
+
+    // ✅ 1. FINISH CHECK (SABSE UPAR)
+    if (viewModel.quizState == QuizViewModel.QuizUiState.Finished) {
+        onQuizFinished()
+        return
+    }
 
     val configuration = LocalConfiguration.current
     val isLandscape =
         configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    val question = viewModel.currentQuestion ?: return
-
-    var autoNext by remember { mutableStateOf(false) }
-
-    LaunchedEffect(autoNext) {
-        if (autoNext) {
-            delay(400)
-            viewModel.nextQuestion()
-            autoNext = false
-        }
+    val question = viewModel.currentQuestion
+    if (question == null) {
+        Spacer(modifier = Modifier.fillMaxSize())
+        return
     }
 
     Column(
@@ -49,17 +50,14 @@ fun QuizScreen(viewModel: QuizViewModel) {
             .padding(16.dp)
     ) {
 
-        // ---------- TIMER ----------
-        QuizTimer(
-            timeLeft = viewModel.timeLeft
-        )
+        QuizTimer(timeLeft = viewModel.timeLeft)
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ---------- QUESTION PROGRESS ----------
         Text(
             text = "Question ${viewModel.currentQuestionIndex + 1} of ${viewModel.totalQuestions()}",
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -71,7 +69,6 @@ fun QuizScreen(viewModel: QuizViewModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // ---------- QUESTION ----------
         Text(
             text = question.question,
             fontSize = 22.sp,
@@ -81,65 +78,32 @@ fun QuizScreen(viewModel: QuizViewModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ---------- OPTIONS ----------
         if (isLandscape) {
-            OptionsGrid(
-                question = question,
-                viewModel = viewModel,
-                onAnswered = { autoNext = true }
-            )
+            OptionsGrid(question, viewModel)
         } else {
-            OptionsList(
-                question = question,
-                viewModel = viewModel,
-                onAnswered = { autoNext = true }
-            )
+            OptionsList(question, viewModel)
         }
     }
 }
 
 @Composable
-fun OptionsList(
-    question: Question,
-    viewModel: QuizViewModel,
-    onAnswered: () -> Unit
-) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
+fun OptionsList(question: Question, viewModel: QuizViewModel) {
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         itemsIndexed(question.options) { index, option ->
-            OptionItem(
-                option = option,
-                index = index,
-                question = question,
-                viewModel = viewModel,
-                onAnswered = onAnswered
-            )
+            OptionItem(option, index, question, viewModel)
         }
     }
 }
 
 @Composable
-fun OptionsGrid(
-    question: Question,
-    viewModel: QuizViewModel,
-    onAnswered: () -> Unit
-) {
+fun OptionsGrid(question: Question, viewModel: QuizViewModel) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth()
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         itemsIndexed(question.options) { index, option ->
-            OptionItem(
-                option = option,
-                index = index,
-                question = question,
-                viewModel = viewModel,
-                onAnswered = onAnswered
-            )
+            OptionItem(option, index, question, viewModel)
         }
     }
 }
@@ -149,8 +113,7 @@ fun OptionItem(
     option: String,
     index: Int,
     question: Question,
-    viewModel: QuizViewModel,
-    onAnswered: () -> Unit
+    viewModel: QuizViewModel
 ) {
     val answerState = viewModel.answerState
 
@@ -167,10 +130,6 @@ fun OptionItem(
         text = option,
         isSelected = isSelected,
         isCorrect = isCorrect,
-        onClick = {
-            viewModel.selectOption(index)
-            onAnswered()
-        }
+        onClick = { viewModel.selectOption(index) }
     )
 }
-

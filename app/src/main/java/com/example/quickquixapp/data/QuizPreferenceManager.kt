@@ -7,7 +7,6 @@ import com.example.quickquixapp.data.datasource.PreferenceDataSource
  * QuizPreferenceManager
  *
  * Handles ONLY app-level settings using SharedPreferences.
- * (High scores are now handled by Room Database)
  */
 class QuizPreferenceManager(
     context: Context

@@ -1,6 +1,7 @@
 package com.example.quickquixapp.ui.highscore
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -16,7 +17,8 @@ class HighScoreViewModel(
     var userScores by mutableStateOf<List<UserScoreEntity>>(emptyList())
         private set
 
-    var highScore by mutableStateOf(0)
+
+    var highScore by mutableIntStateOf(0)
         private set
 
     init {
