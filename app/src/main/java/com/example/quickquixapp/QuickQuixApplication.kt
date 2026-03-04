@@ -12,11 +12,10 @@ class QuickQuixApplication : Application() {
         private set
 
     override fun onCreate() {
-
+        ActivityLifecycleCallback.register(this)
         super.onCreate()
 
         CleverTapAPI.setDebugLevel(CleverTapAPI.LogLevel.VERBOSE)
-        ActivityLifecycleCallback.register(this)
         CleverTapAPI.createNotificationChannel(
             applicationContext,
             "quiz_channel",                // Channel ID (must match dashboard)
