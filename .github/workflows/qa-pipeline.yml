@@ -1,0 +1,227 @@
+name: 🤖 AI QA Pipeline
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  ai-qa-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ─────────────────────────
+      # 1. Checkout + Java Setup
+      # ─────────────────────────
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 🔧 Make Gradle Executable
+        run: chmod +x gradlew
+
+      # ─────────────────────────
+      # 2. Pipeline Started
+      # ─────────────────────────
+      - name: 📲 Slack — Pipeline Started
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"text\": \"⚙️ *QA Pipeline Started*\n👤 Pushed by: *${{ github.actor }}*\n🌿 Branch: \`${{ github.ref_name }}\`\n📝 Commit: \`${{ github.sha }}\`\"
+          }"
+
+      # ─────────────────────────
+      # 3. AI Test Generation
+      # ─────────────────────────
+      - name: 🤖 AI Generate Test Cases
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d '{"text": "🤖 *AI test cases generate kar raha hai...*"}'
+
+          mkdir -p src/test/kotlin/generated
+
+          # Kotlin files count check
+          KT_COUNT=$(find src/main/kotlin -name "*.kt" | wc -l)
+          echo "Found $KT_COUNT Kotlin files"
+
+          find src/main/kotlin -name "*.kt" | while read KOTLIN_FILE; do
+            SOURCE_CODE=$(cat "$KOTLIN_FILE" | jq -Rs .)
+            FILENAME=$(basename "$KOTLIN_FILE" .kt)
+
+            echo "Generating test for: $KOTLIN_FILE"
+
+            RESPONSE=$(curl -s https://models.inference.ai.azure.com/chat/completions \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_AI_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"model\": \"gpt-4o\",
+                \"messages\": [{
+                  \"role\": \"system\",
+                  \"content\": \"You are an expert Android SDK test engineer. Always return ONLY valid Kotlin test code. No markdown, no explanation, no backticks.\"
+                },{
+                  \"role\": \"user\",
+                  \"content\": \"Generate comprehensive JUnit4 + Mockito test cases for this Kotlin SDK code. Cover: happy path, edge cases, null inputs, exceptions.\n\nCode:\n$SOURCE_CODE\"
+                }],
+                \"max_tokens\": 4000
+              }")
+
+            # Save generated test
+            echo "$RESPONSE" | jq -r '.choices[0].message.content' \
+              > "src/test/kotlin/generated/${FILENAME}Test.kt"
+
+            echo "✅ Done: ${FILENAME}Test.kt"
+          done
+
+          # Count generated tests
+          TEST_COUNT=$(find src/test/kotlin/generated -name "*Test.kt" | wc -l)
+
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"✅ *$TEST_COUNT test files generate ho gaye!*\"}"
+
+      # ─────────────────────────
+      # 4. Run Tests
+      # ─────────────────────────
+      - name: ⚙️ Run Tests
+        id: run_tests
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d '{"text": "⚙️ *Tests run ho rahe hain...*"}'
+
+          set +e
+          ./gradlew test 2>&1 | tee test_output.txt
+          TEST_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          # Count pass/fail
+          PASSED=$(grep -c "PASSED" test_output.txt || true)
+          FAILED=$(grep -c "FAILED" test_output.txt || true)
+
+          echo "test_exit=$TEST_EXIT" >> $GITHUB_OUTPUT
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+
+      # ─────────────────────────
+      # 5. Tests Passed ✅
+      # ─────────────────────────
+      - name: ✅ Slack — All Tests Passed
+        if: steps.run_tests.outputs.test_exit == '0'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"text\": \"✅ *Saare Tests PASS ho gaye!* 🎉\n✔️ Passed: ${{ steps.run_tests.outputs.passed }}\n🌿 Branch: \`${{ github.ref_name }}\`\n👤 Pushed by: ${{ github.actor }}\"
+          }"
+
+      # ─────────────────────────
+      # 6. Tests Failed → AI Fix
+      # ─────────────────────────
+      - name: 🔧 AI Auto-Fix Failed Tests
+        if: steps.run_tests.outputs.test_exit != '0'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"text\": \"❌ *Tests fail hue!*\n✔️ Passed: ${{ steps.run_tests.outputs.passed }}\n❌ Failed: ${{ steps.run_tests.outputs.failed }}\n🔧 AI fix kar raha hai...\"
+          }"
+
+          ERROR_LOG=$(cat test_output.txt | tail -100 | jq -Rs .)
+
+          find src/test/kotlin/generated -name "*Test.kt" | while read TEST_FILE; do
+            TEST_CODE=$(cat "$TEST_FILE" | jq -Rs .)
+
+            FIXED=$(curl -s https://models.inference.ai.azure.com/chat/completions \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_AI_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"model\": \"gpt-4o\",
+                \"messages\": [{
+                  \"role\": \"system\",
+                  \"content\": \"You are an expert Android test engineer. Return ONLY fixed Kotlin code. No markdown, no explanation.\"
+                },{
+                  \"role\": \"user\",
+                  \"content\": \"Fix this failing Kotlin test.\n\nError Log:\n$ERROR_LOG\n\nTest File:\n$TEST_CODE\"
+                }],
+                \"max_tokens\": 4000
+              }")
+
+            echo "$FIXED" | jq -r '.choices[0].message.content' > "$TEST_FILE"
+            echo "🔧 Fixed: $TEST_FILE"
+          done
+
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d '{"text": "🔧 *AI fix apply ho gaya! Re-running tests...*"}'
+
+      # ─────────────────────────
+      # 7. Re-run After Fix
+      # ─────────────────────────
+      - name: 🔄 Re-run Tests After Fix
+        if: steps.run_tests.outputs.test_exit != '0'
+        id: rerun_tests
+        run: |
+          set +e
+          ./gradlew test 2>&1 | tee rerun_output.txt
+          RERUN_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          PASSED2=$(grep -c "PASSED" rerun_output.txt || true)
+          FAILED2=$(grep -c "FAILED" rerun_output.txt || true)
+
+          echo "rerun_exit=$RERUN_EXIT" >> $GITHUB_OUTPUT
+          echo "passed2=$PASSED2" >> $GITHUB_OUTPUT
+          echo "failed2=$FAILED2" >> $GITHUB_OUTPUT
+
+      # ─────────────────────────
+      # 8. Final Results
+      # ─────────────────────────
+      - name: 🎉 Slack — AI ne Fix Kar Diya!
+        if: |
+          steps.run_tests.outputs.test_exit != '0' &&
+          steps.rerun_tests.outputs.rerun_exit == '0'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"text\": \"🎉 *AI ne fix kar diya! Saare tests pass!*\n✔️ Passed: ${{ steps.rerun_tests.outputs.passed2 }}\n🌿 Branch: \`${{ github.ref_name }}\`\"
+          }"
+
+      - name: 🚨 Slack — Manual Review Chahiye!
+        if: |
+          steps.run_tests.outputs.test_exit != '0' &&
+          steps.rerun_tests.outputs.rerun_exit != '0'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"text\": \"🚨 *Tests abhi bhi fail hain! Manual review chahiye!*\n❌ Failed: ${{ steps.rerun_tests.outputs.failed2 }}\n🌿 Branch: \`${{ github.ref_name }}\`\n👤 Pushed by: ${{ github.actor }}\"
+          }"
+  ```
+
+---
+
+## 🔑 Step 3 — GitHub Secrets (2 secrets chahiye)
+  ```
+  GitHub Repo
+  → Settings
+  → Secrets and variables
+  → Actions
+  → New repository secret
+
+Secret 1:
+  Name:  GITHUB_AI_TOKEN
+  Value: (naya token jo tumne banaya)
+
+Secret 2:
+  Name:  SLACK_WEBHOOK_URL
+  Value: https://hooks.slack.com/services/XXXX...
