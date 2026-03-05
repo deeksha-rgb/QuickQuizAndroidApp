@@ -1,0 +1,176 @@
+name: AI QA Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  ai-qa-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Make Gradle Executable
+        run: chmod +x gradlew
+
+      - name: Slack Pipeline Started
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"QA Pipeline Started\nPushed by: ${{ github.actor }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\"}"
+
+      - name: AI Generate Test Cases
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"AI test cases generate kar raha hai...\"}"
+
+          mkdir -p app/src/test/java/generated
+
+          find app/src/main/java -name "*.kt" | while read KOTLIN_FILE; do
+            SOURCE_CODE=$(cat "$KOTLIN_FILE" | jq -Rs .)
+            FILENAME=$(basename "$KOTLIN_FILE" .kt)
+
+            RESPONSE=$(curl -s https://models.inference.ai.azure.com/chat/completions \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_AI_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"model\": \"gpt-4o\",
+                \"messages\": [
+                  {
+                    \"role\": \"system\",
+                    \"content\": \"You are an expert Android test engineer. Return ONLY valid Kotlin test code using JUnit4 and Mockito. No markdown, no backticks, no explanation.\"
+                  },
+                  {
+                    \"role\": \"user\",
+                    \"content\": \"Generate JUnit4 + Mockito test cases for this Kotlin code. Cover happy path, edge cases, null inputs, exceptions.\n\nCode:\n$SOURCE_CODE\"
+                  }
+                ],
+                \"max_tokens\": 4000
+              }")
+
+            echo "$RESPONSE" | jq -r '.choices[0].message.content' \
+              > "app/src/test/java/generated/${FILENAME}Test.kt"
+
+            echo "Generated test for: $KOTLIN_FILE"
+          done
+
+          TEST_COUNT=$(find app/src/test/java/generated -name "*Test.kt" | wc -l)
+
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"${TEST_COUNT} test files generate ho gaye!\"}"
+
+      - name: Run Tests
+        id: run_tests
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"Tests run ho rahe hain...\"}"
+
+          set +e
+          ./gradlew test 2>&1 | tee test_output.txt
+          TEST_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          PASSED=$(grep -c "PASSED" test_output.txt || true)
+          FAILED=$(grep -c "FAILED" test_output.txt || true)
+
+          echo "test_exit=$TEST_EXIT" >> $GITHUB_OUTPUT
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+
+      - name: Slack Tests Passed
+        if: steps.run_tests.outputs.test_exit == '0'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"All Tests PASSED!\nPassed: ${{ steps.run_tests.outputs.passed }}\nBranch: ${{ github.ref_name }}\nPushed by: ${{ github.actor }}\"}"
+
+      - name: AI Auto Fix Failed Tests
+        if: steps.run_tests.outputs.test_exit != '0'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"Tests fail hue!\nPassed: ${{ steps.run_tests.outputs.passed }}\nFailed: ${{ steps.run_tests.outputs.failed }}\nAI fix kar raha hai...\"}"
+
+          ERROR_LOG=$(cat test_output.txt | tail -100 | jq -Rs .)
+
+          find app/src/test/java/generated -name "*Test.kt" | while read TEST_FILE; do
+            TEST_CODE=$(cat "$TEST_FILE" | jq -Rs .)
+
+            FIXED=$(curl -s https://models.inference.ai.azure.com/chat/completions \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_AI_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"model\": \"gpt-4o\",
+                \"messages\": [
+                  {
+                    \"role\": \"system\",
+                    \"content\": \"You are an expert Android test engineer. Return ONLY fixed Kotlin code. No markdown, no explanation.\"
+                  },
+                  {
+                    \"role\": \"user\",
+                    \"content\": \"Fix this failing Kotlin test.\n\nError Log:\n$ERROR_LOG\n\nTest File:\n$TEST_CODE\"
+                  }
+                ],
+                \"max_tokens\": 4000
+              }")
+
+            echo "$FIXED" | jq -r '.choices[0].message.content' > "$TEST_FILE"
+            echo "Fixed: $TEST_FILE"
+          done
+
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"AI fix apply ho gaya! Re-running tests...\"}"
+
+      - name: Re-run Tests After Fix
+        if: steps.run_tests.outputs.test_exit != '0'
+        id: rerun_tests
+        run: |
+          set +e
+          ./gradlew test 2>&1 | tee rerun_output.txt
+          RERUN_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          PASSED2=$(grep -c "PASSED" rerun_output.txt || true)
+          FAILED2=$(grep -c "FAILED" rerun_output.txt || true)
+
+          echo "rerun_exit=$RERUN_EXIT" >> $GITHUB_OUTPUT
+          echo "passed2=$PASSED2" >> $GITHUB_OUTPUT
+          echo "failed2=$FAILED2" >> $GITHUB_OUTPUT
+
+      - name: Slack AI Fixed Successfully
+        if: >
+          steps.run_tests.outputs.test_exit != '0' &&
+          steps.rerun_tests.outputs.rerun_exit == '0'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"AI ne fix kar diya! All tests passing!\nPassed: ${{ steps.rerun_tests.outputs.passed2 }}\nBranch: ${{ github.ref_name }}\"}"
+
+      - name: Slack Manual Review Needed
+        if: >
+          steps.run_tests.outputs.test_exit != '0' &&
+          steps.rerun_tests.outputs.rerun_exit != '0'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"Tests abhi bhi fail! Manual review chahiye!\nFailed: ${{ steps.rerun_tests.outputs.failed2 }}\nBranch: ${{ github.ref_name }}\nPushed by: ${{ github.actor }}\"}"

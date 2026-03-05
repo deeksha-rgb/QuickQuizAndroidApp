@@ -1,6 +1,9 @@
 package com.example.quickquixapp
 
 import android.app.Application
+import android.app.NotificationManager
+import com.clevertap.android.sdk.ActivityLifecycleCallback
+import com.clevertap.android.sdk.CleverTapAPI
 import com.example.quickquixapp.di.AppContainer
 
 class QuickQuixApplication : Application() {
@@ -9,7 +12,19 @@ class QuickQuixApplication : Application() {
         private set
 
     override fun onCreate() {
+        ActivityLifecycleCallback.register(this)
         super.onCreate()
+
+        CleverTapAPI.setDebugLevel(CleverTapAPI.LogLevel.VERBOSE)
+        CleverTapAPI.createNotificationChannel(
+            applicationContext,
+            "quiz_channel",                // Channel ID (must match dashboard)
+            "Quiz Notifications",          // Channel Name
+            "Notifications related to quizzes",
+            NotificationManager.IMPORTANCE_HIGH,
+            true                           // Show badge
+        )
+
 
         //  THIS is where Context comes from
         appContainer   = AppContainer(this)
